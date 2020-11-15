@@ -33,8 +33,7 @@ final class DefaultCallAdapterFactory extends CallAdapter.Factory {
   }
 
   @Override
-  public @Nullable CallAdapter<?, ?> get(
-      Type returnType, Annotation[] annotations, Retrofit retrofit) {
+  public @Nullable CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
     if (getRawType(returnType) != Call.class) {
       return null;
     }
@@ -48,7 +47,7 @@ final class DefaultCallAdapterFactory extends CallAdapter.Factory {
         Utils.isAnnotationPresent(annotations, SkipCallbackExecutor.class)
             ? null
             : callbackExecutor;
-
+    //返回对应的callAdapter
     return new CallAdapter<Object, Call<?>>() {
       @Override
       public Type responseType() {
@@ -79,6 +78,7 @@ final class DefaultCallAdapterFactory extends CallAdapter.Factory {
           new Callback<T>() {
             @Override
             public void onResponse(Call<T> call, final Response<T> response) {
+              //切一下线程，然后进行调用。这里会通过Handler，切换到UI线程，所以retrofit的回调是在主线程的
               callbackExecutor.execute(
                   () -> {
                     if (delegate.isCanceled()) {

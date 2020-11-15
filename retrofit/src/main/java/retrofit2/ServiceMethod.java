@@ -35,7 +35,7 @@ abstract class ServiceMethod<T> {
     if (returnType == void.class) {
       throw methodError(method, "Service methods cannot return void.");
     }
-
+    //实际的解析
     return HttpServiceMethod.parseAnnotations(retrofit, method, requestFactory);
   }
 

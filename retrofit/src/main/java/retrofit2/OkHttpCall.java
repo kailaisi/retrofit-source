@@ -127,6 +127,7 @@ final class OkHttpCall<T> implements Call<T> {
       failure = creationFailure;
       if (call == null && failure == null) {
         try {
+          //创建okhttp的call
           call = rawCall = createRawCall();
         } catch (Throwable t) {
           throwIfFatal(t);
@@ -143,13 +144,14 @@ final class OkHttpCall<T> implements Call<T> {
     if (canceled) {
       call.cancel();
     }
-
+    //调用okhttp的enqueue方法
     call.enqueue(
         new okhttp3.Callback() {
           @Override
           public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) {
             Response<T> response;
             try {
+              //解析okhttp返回数据
               response = parseResponse(rawResponse);
             } catch (Throwable e) {
               throwIfFatal(e);
@@ -240,6 +242,8 @@ final class OkHttpCall<T> implements Call<T> {
 
     ExceptionCatchingResponseBody catchingBody = new ExceptionCatchingResponseBody(rawBody);
     try {
+      //这里会遍历通过addConvertFatory加入的所有Factory，根据接口返回类型找到对应的Converter
+      // 调用传入的Converter的convert方法，转化为我需要的数据
       T body = responseConverter.convert(catchingBody);
       return Response.success(body, rawResponse);
     } catch (RuntimeException e) {

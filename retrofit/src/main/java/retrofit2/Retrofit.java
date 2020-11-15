@@ -138,9 +138,10 @@ public final class Retrofit {
    */
   @SuppressWarnings("unchecked") // Single-interface proxy creation guarded by parameter safety.
   public <T> T create(final Class<T> service) {
+    //验证合法性
     validateServiceInterface(service);
     return (T)
-        Proxy.newProxyInstance(
+        Proxy. (
             service.getClassLoader(),
             new Class<?>[] {service},
             new InvocationHandler() {
@@ -151,18 +152,20 @@ public final class Retrofit {
               public @Nullable Object invoke(Object proxy, Method method, @Nullable Object[] args)
                   throws Throwable {
                 // If the method is a method from Object then defer to normal invocation.
+                //object类的方法，直接调用
                 if (method.getDeclaringClass() == Object.class) {
                   return method.invoke(this, args);
                 }
                 args = args != null ? args : emptyArgs;
                 return platform.isDefaultMethod(method)
-                    ? platform.invokeDefaultMethod(method, service, proxy, args)
-                    : loadServiceMethod(method).invoke(args);
+                    ? platform.invokeDefaultMethod(method, service, proxy, args)//java8中增加的接口的默认实现方法，也不代理
+                    : loadServiceMethod(method).invoke(args);//其他的进行代理
               }
             });
   }
 
   private void validateServiceInterface(Class<?> service) {
+    //必须是接口
     if (!service.isInterface()) {
       throw new IllegalArgumentException("API declarations must be interfaces.");
     }
@@ -172,8 +175,7 @@ public final class Retrofit {
     while (!check.isEmpty()) {
       Class<?> candidate = check.removeFirst();
       if (candidate.getTypeParameters().length != 0) {
-        StringBuilder message =
-            new StringBuilder("Type parameters are unsupported on ").append(candidate.getName());
+        StringBuilder message = new StringBuilder("Type parameters are unsupported on ").append(candidate.getName());
         if (candidate != service) {
           message.append(" which is an interface of ").append(service.getName());
         }
@@ -181,11 +183,12 @@ public final class Retrofit {
       }
       Collections.addAll(check, candidate.getInterfaces());
     }
-
+    //是否需要提前验证（createService的时候，验证写的接口是否有问题）
     if (validateEagerly) {
       Platform platform = Platform.get();
       for (Method method : service.getDeclaredMethods()) {
         if (!platform.isDefaultMethod(method) && !Modifier.isStatic(method.getModifiers())) {
+          //加载方法
           loadServiceMethod(method);
         }
       }
@@ -247,7 +250,7 @@ public final class Retrofit {
       @Nullable CallAdapter.Factory skipPast, Type returnType, Annotation[] annotations) {
     Objects.requireNonNull(returnType, "returnType == null");
     Objects.requireNonNull(annotations, "annotations == null");
-
+    //获取尝试的calladapter
     int start = callAdapterFactories.indexOf(skipPast) + 1;
     for (int i = start, count = callAdapterFactories.size(); i < count; i++) {
       CallAdapter<?, ?> adapter = callAdapterFactories.get(i).get(returnType, annotations, this);

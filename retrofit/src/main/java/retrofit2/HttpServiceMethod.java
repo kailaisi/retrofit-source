@@ -62,7 +62,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
     } else {
       adapterType = method.getGenericReturnType();
     }
-
+    //创建对应的CallAdapter，用于对返回的数据进行解析处理。所以在解析service的时候，就已经知道要使用那个callAdapter了
     CallAdapter<ResponseT, ReturnT> callAdapter =
         createCallAdapter(retrofit, method, adapterType, annotations);
     Type responseType = callAdapter.responseType();
@@ -85,7 +85,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
         createResponseConverter(retrofit, method, responseType);
 
     okhttp3.Call.Factory callFactory = retrofit.callFactory;
-    if (!isKotlinSuspendFunction) {
+    if (!isKotlinSuspendFunction) {//是否是kotlin的suspnd的挂起方法
       return new CallAdapted<>(requestFactory, callFactory, responseConverter, callAdapter);
     } else if (continuationWantsResponse) {
       //noinspection unchecked Kotlin compiler guarantees ReturnT to be Object.
@@ -117,10 +117,12 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
     }
   }
 
+  //创建对应的converter
   private static <ResponseT> Converter<ResponseBody, ResponseT> createResponseConverter(
       Retrofit retrofit, Method method, Type responseType) {
     Annotation[] annotations = method.getAnnotations();
     try {
+      //返回的是retrofit的responseBodyConverter()方法，内部调用的是convertFactory对象数据
       return retrofit.responseBodyConverter(responseType, annotations);
     } catch (RuntimeException e) { // Wide exception range because factories are user code.
       throw methodError(method, e, "Unable to create converter for %s", responseType);
@@ -142,6 +144,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
 
   @Override
   final @Nullable ReturnT invoke(Object[] args) {
+    //创建call
     Call<ResponseT> call = new OkHttpCall<>(requestFactory, args, callFactory, responseConverter);
     return adapt(call, args);
   }
