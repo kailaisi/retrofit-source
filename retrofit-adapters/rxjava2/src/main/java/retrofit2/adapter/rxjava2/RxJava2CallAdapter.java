@@ -64,8 +64,7 @@ final class RxJava2CallAdapter<R> implements CallAdapter<R, Object> {
 
   @Override
   public Object adapt(Call<R> call) {
-    Observable<Response<R>> responseObservable =
-        isAsync ? new CallEnqueueObservable<>(call) : new CallExecuteObservable<>(call);
+    Observable<Response<R>> responseObservable = isAsync ? new CallEnqueueObservable<>(call) : new CallExecuteObservable<>(call);
 
     Observable<?> observable;
     if (isResult) {

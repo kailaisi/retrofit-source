@@ -314,8 +314,7 @@ public final class Retrofit {
     int start = converterFactories.indexOf(skipPast) + 1;
     for (int i = start, count = converterFactories.size(); i < count; i++) {
       Converter.Factory factory = converterFactories.get(i);
-      Converter<?, RequestBody> converter =
-          factory.requestBodyConverter(type, parameterAnnotations, methodAnnotations, this);
+      Converter<?, RequestBody> converter =factory.requestBodyConverter(type, parameterAnnotations, methodAnnotations, this);
       if (converter != null) {
         //noinspection unchecked
         return (Converter<T, RequestBody>) converter;

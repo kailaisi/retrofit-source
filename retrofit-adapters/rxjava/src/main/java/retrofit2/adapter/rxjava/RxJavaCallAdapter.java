@@ -57,8 +57,7 @@ final class RxJavaCallAdapter<R> implements CallAdapter<R, Object> {
 
   @Override
   public Object adapt(Call<R> call) {
-    OnSubscribe<Response<R>> callFunc =
-        isAsync ? new CallEnqueueOnSubscribe<>(call) : new CallExecuteOnSubscribe<>(call);
+    OnSubscribe<Response<R>> callFunc = isAsync ? new CallEnqueueOnSubscribe<>(call) : new CallExecuteOnSubscribe<>(call);
 
     OnSubscribe<?> func;
     if (isResult) {
