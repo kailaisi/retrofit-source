@@ -39,6 +39,7 @@ final class CallEnqueueObservable<T> extends Observable<Response<T>> {
     CallCallback<T> callback = new CallCallback<>(call, observer);
     observer.onSubscribe(callback);
     if (!callback.isDisposed()) {
+      //调用.subScribe的时候，会调用该方法，从而执行enqueue操作，然后会调用callback的onResponse或者onFailed方法
       call.enqueue(callback);
     }
   }

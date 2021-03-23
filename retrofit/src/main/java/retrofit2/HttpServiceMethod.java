@@ -145,6 +145,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
     ReturnT invoke(Object[] args) {
         //创建call
         Call<ResponseT> call = new OkHttpCall<>(requestFactory, args, callFactory, responseConverter);
+        //返回的具体的类
         return adapt(call, args);
     }
 

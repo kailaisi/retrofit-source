@@ -127,7 +127,7 @@ final class OkHttpCall<T> implements Call<T> {
       failure = creationFailure;
       if (call == null && failure == null) {
         try {
-          //创建okhttp的call
+          //创建okhttp所使用的的call
           call = rawCall = createRawCall();
         } catch (Throwable t) {
           throwIfFatal(t);
@@ -151,7 +151,8 @@ final class OkHttpCall<T> implements Call<T> {
           public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) {
             Response<T> response;
             try {
-              //解析okhttp返回数据
+              //rawResponse是OKhttp返回的response信息
+              //通过parseResponse方法，将response信息，解析成为接口中的返回数据类型
               response = parseResponse(rawResponse);
             } catch (Throwable e) {
               throwIfFatal(e);
@@ -160,6 +161,7 @@ final class OkHttpCall<T> implements Call<T> {
             }
 
             try {
+              //将okhttp的response信息，交给retrofit中的callback去处理
               callback.onResponse(OkHttpCall.this, response);
             } catch (Throwable t) {
               throwIfFatal(t);
@@ -207,6 +209,8 @@ final class OkHttpCall<T> implements Call<T> {
   }
 
   private okhttp3.Call createRawCall() throws IOException {
+    //1.requestFactory.create(args)，requestFactory是ServiceMethod实例中的对象，保存了Method中的相关注解的信息，这里会结合args，创建一个Request的实例
+    //2.callFactory，其实是OKhttpClient，通过OkHttpClient的newCall方法，创建一个OkHttp的Call实例
     okhttp3.Call call = callFactory.newCall(requestFactory.create(args));
     if (call == null) {
       throw new NullPointerException("Call.Factory returned null.");

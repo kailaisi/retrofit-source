@@ -141,7 +141,7 @@ public final class Retrofit {
     //验证合法性
     validateServiceInterface(service);
     return (T)
-        Proxy. (
+        Proxy.newProxyInstance (
             service.getClassLoader(),
             new Class<?>[] {service},
             new InvocationHandler() {
@@ -632,6 +632,7 @@ public final class Retrofit {
 
       Executor callbackExecutor = this.callbackExecutor;
       if (callbackExecutor == null) {
+        //安卓平台的，executor的作用，是将数据的处理，扔到主线程去处理
         callbackExecutor = platform.defaultCallbackExecutor();
       }
 
